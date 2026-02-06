@@ -1,4 +1,4 @@
-"""Domain generation service using LLM."""
+"""Layout generation service using LLM."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,61 +8,61 @@ import yaml
 import json
 
 
-class GeneratorError(RuntimeError):
-    """Base error for generator operations."""
+class LayoutGeneratorError(RuntimeError):
+    """Base error for layout generator operations."""
 
 
-class MissingProjectConfigError(GeneratorError):
+class MissingProjectConfigError(LayoutGeneratorError):
     """Raised when .smartgen.yml is not found."""
 
 
-class MissingSRSError(GeneratorError):
+class MissingSRSError(LayoutGeneratorError):
     """Raised when srs.md is not found."""
 
 
-class MissingPolicyError(GeneratorError):
+class MissingPolicyError(LayoutGeneratorError):
     """Raised when policy file is not found."""
 
 
-class LLMError(GeneratorError):
+class LLMError(LayoutGeneratorError):
     """Raised when LLM call fails."""
 
 
 @dataclass(frozen=True)
-class DomainGenerationResult:
-    """Result of domain generation."""
+class LayoutGenerationResult:
+    """Result of layout generation."""
 
     provider_name: str
     generated_files: list[Path]
     llm_response: str
 
 
-class DomainGeneratorService:
-    """Service for generating domain elements using LLM."""
+class LayoutGeneratorService:
+    """Service for generating application layout using LLM."""
 
     def __init__(self, debug: bool = False) -> None:
-        """Initialize the domain generator service.
+        """Initialize the layout generator service.
         
         Args:
             debug: Enable debug output for all steps
         """
         self._debug = debug
 
-    def generate_domain(self, project_dir: Path) -> DomainGenerationResult:
+    def generate_layout(self, project_dir: Path) -> LayoutGenerationResult:
         """
-        Generate domain elements based on SRS and DDD policy.
+        Generate application, infrastructure, and interface layer structures based on SRS.
         
         Args:
             project_dir: The project directory containing .smartgen.yml
             
         Returns:
-            DomainGenerationResult with generated files and metadata
+            LayoutGenerationResult with generated files and metadata
             
         Raises:
-            GeneratorError: If configuration or required files are missing
+            LayoutGeneratorError: If configuration or required files are missing
         """
         if self._debug:
-            self._print_debug("Starting domain generation", f"Project directory: {project_dir}")
+            self._print_debug("Starting layout generation", f"Project directory: {project_dir}")
         
         # 1. Load project configuration
         config = self._load_project_config(project_dir)
@@ -74,14 +74,14 @@ class DomainGeneratorService:
         
         default_provider = llm_config.get("default")
         if not default_provider:
-            raise GeneratorError("No default LLM provider configured in .smartgen.yml")
+            raise LayoutGeneratorError("No default LLM provider configured in .smartgen.yml")
         
         providers = llm_config.get("providers", {})
         provider_config = providers.get(default_provider)
         if not provider_config:
-            raise GeneratorError(f"Provider '{default_provider}' not found in configuration")
+            raise LayoutGeneratorError(f"Provider '{default_provider}' not found in configuration")
         
-        # Merge with global config to get API keys (they're not stored in project file)
+        # Merge with global config to get API keys
         provider_config = self._merge_with_global_config(default_provider, provider_config)
         
         # 2. Read SRS
@@ -90,14 +90,21 @@ class DomainGeneratorService:
         if self._debug:
             self._print_debug("SRS Content", srs_content, is_text=True)
         
-        # 3. Read DDD policy
+        # 3. Read layout policy
         language = project_config.get("language", "python")
         policy_content = self._read_policy(language)
         
         if self._debug:
-            self._print_debug("DDD Policy", policy_content[:500] + "..." if len(policy_content) > 500 else policy_content, is_text=True)
+            self._print_debug("Layout Policy", policy_content[:500] + "..." if len(policy_content) > 500 else policy_content, is_text=True)
         
-        # 4. Call LLM to generate domain elements
+        # 4. Read existing domain files
+        domain_files_content = self._read_domain_files(project_dir)
+        
+        if self._debug:
+            domain_summary = f"Found {len(domain_files_content)} domain file(s)"
+            self._print_debug("Domain Files", domain_summary)
+        
+        # 5. Call LLM to generate layout structure
         if self._debug:
             self._print_debug("Calling LLM", f"Provider: {default_provider} ({provider_config.get('type')})")
         
@@ -105,13 +112,14 @@ class DomainGeneratorService:
             provider_config=provider_config,
             srs_content=srs_content,
             policy_content=policy_content,
+            domain_files_content=domain_files_content,
         )
         
         if self._debug:
             self._print_debug("LLM Response", llm_response, is_text=True)
         
-        # 5. Parse and write generated files
-        generated_files = self._write_domain_files(
+        # 6. Parse and write generated files
+        generated_files = self._write_layout_files(
             project_dir=project_dir,
             llm_response=llm_response,
         )
@@ -119,7 +127,7 @@ class DomainGeneratorService:
         if self._debug:
             self._print_debug("Files Generated", f"Created {len(generated_files)} file(s)")
         
-        return DomainGenerationResult(
+        return LayoutGenerationResult(
             provider_name=default_provider,
             generated_files=generated_files,
             llm_response=llm_response,
@@ -180,16 +188,16 @@ class DomainGeneratorService:
         content = srs_path.read_text(encoding="utf-8")
         if not content.strip():
             raise MissingSRSError(
-                "srs.md is empty. Please provide requirements before generating domain."
+                "srs.md is empty. Please provide requirements before generating layout."
             )
         
         return content
 
     def _read_policy(self, language: str) -> str:
-        """Read the DDD domain policy file."""
+        """Read the layout policy file."""
         # Get the path to the policy file relative to this module
         policies_dir = Path(__file__).parent.parent / "policies" / "ddd" / language
-        policy_path = policies_dir / "domain.txt"
+        policy_path = policies_dir / "layout.txt"
         
         if not policy_path.exists():
             raise MissingPolicyError(
@@ -198,19 +206,58 @@ class DomainGeneratorService:
         
         return policy_path.read_text(encoding="utf-8")
 
+    def _read_domain_files(self, project_dir: Path) -> dict[str, str]:
+        """Read all generated domain files from src/domain directory.
+        
+        Args:
+            project_dir: The project directory
+            
+        Returns:
+            Dictionary mapping relative file paths to their content
+        """
+        domain_dir = project_dir / "src" / "domain"
+        domain_files = {}
+        
+        # If domain directory doesn't exist, return empty dict
+        if not domain_dir.exists():
+            return domain_files
+        
+        # Recursively read all Python files in the domain directory
+        for file_path in domain_dir.rglob("*.py"):
+            # Skip __pycache__ and other special directories
+            if "__pycache__" in file_path.parts or file_path.name.startswith("."):
+                continue
+            
+            # Get relative path from project directory
+            relative_path = file_path.relative_to(project_dir)
+            
+            # Read file content
+            try:
+                content = file_path.read_text(encoding="utf-8")
+                domain_files[str(relative_path)] = content
+            except (OSError, UnicodeDecodeError) as e:
+                # Skip files that can't be read
+                if self._debug:
+                    self._print_debug("Warning", f"Could not read {relative_path}: {e}")
+                continue
+        
+        return domain_files
+
     def _call_llm(
         self,
         provider_config: dict[str, Any],
         srs_content: str,
         policy_content: str,
+        domain_files_content: dict[str, str],
     ) -> str:
         """
-        Call the LLM to generate domain elements.
+        Call the LLM to generate layout structures.
         
         Args:
             provider_config: LLM provider configuration
             srs_content: Content of the SRS
-            policy_content: DDD policy rules
+            policy_content: Layout policy rules
+            domain_files_content: Dictionary of domain file paths and their content
             
         Returns:
             LLM response containing generated code
@@ -218,7 +265,7 @@ class DomainGeneratorService:
         provider_type = provider_config.get("type")
         
         # Build the prompt
-        prompt = self._build_prompt(srs_content, policy_content)
+        prompt = self._build_prompt(srs_content, policy_content, domain_files_content)
         
         if self._debug:
             self._print_debug("Prompt sent to LLM", prompt, is_text=True)
@@ -230,39 +277,50 @@ class DomainGeneratorService:
         else:
             raise LLMError(f"Unsupported provider type: {provider_type}")
 
-    def _build_prompt(self, srs_content: str, policy_content: str) -> str:
+    def _build_prompt(self, srs_content: str, policy_content: str, domain_files_content: dict[str, str]) -> str:
         """Build the prompt for the LLM."""
-        return f"""You are a domain modeling expert. Based on the Software Requirements Specification (SRS) and the Domain-Driven Design (DDD) policy provided, generate the domain layer code.
+        # Format domain files for the prompt
+        domain_files_section = ""
+        if domain_files_content:
+            domain_files_section = "\n# Existing Domain Layer Files:\n"
+            for file_path, content in domain_files_content.items():
+                domain_files_section += f"\n## {file_path}\n```python\n{content}\n```\n"
+        
+        return f"""You are a software architect specializing in layered architecture design. Based on the Software Requirements Specification (SRS), the existing Domain Layer files, and the layout policy provided, generate the structure (no implementations) for the Application, Infrastructure, and Interface layers.
 
-# DDD Policy and Guidelines:
+# Layout Policy and Guidelines:
 {policy_content}
 
 # Software Requirements Specification:
 {srs_content}
-
+{domain_files_section}
 # Instructions:
 1. Analyze the requirements in the SRS
-2. Identify domain entities, value objects, aggregates, and domain services
-3. Generate Python code following the DDD policy strictly
-4. The SRS may contain requirements that do not need to be implemented in the domain layer; only generate code for domain-relevant requirements
-5. IMPORTANT: Return the generated code in a JSON format with file paths and content as shown below:
+2. Review the existing domain models to understand what entities, value objects, and aggregates exist
+3. Design the Application, Infrastructure, and Interface layers that work with these domain models
+4. Organize files following the policy guidelines strictly
+5. IMPORTANT: Return the generated structure in a JSON format with file paths and content as shown below:
 
 # Output Format:
 Return a JSON object with the following structure:
 {{
     "files": [
         {{
-            "path": "src/domain/aggregates/order.py",
-            "content": "# Generated code here..."
+            "path": "src/application/use_cases/create_order_use_case.py",
+            "content": ""
         }},
         {{
-            "path": "src/domain/value_objects/email.py",
-            "content": "# Generated code here..."
+            "path": "src/infrastructure/repositories/order_repository.py",
+            "content": ""
+        }},
+        {{
+            "path": "src/interface/controllers/order_controller.py",
+            "content": ""
         }}
     ]
 }}
 
-Generate the domain layer code now:"""
+Generate the application layout structure now:"""
 
     def _call_ollama(self, provider_config: dict[str, Any], prompt: str) -> str:
         """Call Ollama local LLM."""
@@ -328,7 +386,7 @@ Generate the domain layer code now:"""
                 response = client.chat.completions.create(
                     model=model,
                     messages=[
-                        {"role": "system", "content": "You are an expert software architect specializing in Domain-Driven Design. Return your response as valid JSON with this structure: {\"files\": [{\"path\": \"...\", \"content\": \"...\"}]}"},
+                        {"role": "system", "content": "You are an expert software architect. Return your response as valid JSON with this structure: {\"files\": [{\"path\": \"...\", \"content\": \"...\"}]}"},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.2,
@@ -409,17 +467,17 @@ Generate the domain layer code now:"""
                 f"Response snippet: {snippet}..."
             ) from e
 
-    def _write_domain_files(
+    def _write_layout_files(
         self,
         project_dir: Path,
         llm_response: str,
     ) -> list[Path]:
         """
-        Parse LLM response and write domain files.
+        Parse LLM response and write layout files.
         
         Args:
             project_dir: Project directory
-            llm_response: LLM response containing generated code
+            llm_response: LLM response containing generated structure
             
         Returns:
             List of generated file paths

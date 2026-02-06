@@ -12,62 +12,58 @@ A DDD/Clean Architecture friendly code generator.
 ```bash
 # Install smartgen with all dependencies
 pip install smartgen
+```
 
+All required dependencies (including OpenAI support) are installed automatically.
 
-## Usage
+## Quick Start
 
-### 1. Initialize a New Project
+### 1. Set up your LLM provider
+
+**Option A: Use Ollama (Local, Free)**
+```bash
+# Install Ollama: https://ollama.ai
+# Start Ollama and pull a model:
+ollama pull deepseek-coder-v2
+
+# Configure smartgen:
+smartgen llmconfig add ollama local --model deepseek-coder-v2
+smartgen llmconfig set-default ollama
+```
+
+**Option B: Use OpenAI Codex (Cloud, Recommended for GPT models)**
+```bash
+# Get API key from https://platform.openai.com/api-keys
+
+# For code-davinci-002 (best quality):
+smartgen llmconfig add codex cloud --model code-davinci-002 --api-key sk-...
+
+# Or use any OpenAI model:
+smartgen llmconfig add gpt4 cloud --model gpt-4 --api-key sk-...
+
+smartgen llmconfig set-default codex
+```
+
+### 2. Initialize your project
 
 ```bash
 smartgen init --language python --pattern ddd --app api
 ```
 
-This creates:
-- `.smartgen.yml` - Project configuration
-- `srs.md` - Software Requirements Specification
-- `stories/` - User stories directory
-- `src/` - Source code directory
+### 3. Write your requirements
 
-### 2. Configure Your SRS
+Edit `srs.md` with your requirements.
 
-Edit `srs.md` and add your software requirements. Example:
-
-```markdown
-# Software Requirements Specification
-
-## Overview
-Build an e-commerce system...
-
-## Features
-- User registration and authentication
-- Product catalog management
-- Shopping cart
-- Order processing
-...
-```
-
-### 3. Generate Domain Layer
+### 4. Generate domain layer
 
 ```bash
 smartgen generate domain
 ```
 
-This command:
-1. Reads the LLM configuration from `.smartgen.yml`
-2. Reads your requirements from `srs.md`
-3. Applies DDD policy rules from `policies/ddd/python/domain.txt`
-4. Generates domain layer code with proper structure:
-   - Aggregates
-   - Entities
-   - Value Objects
-   - Domain Services
-   - Domain Errors
-
-The generated code follows DDD best practices:
-- Pure domain models (no framework dependencies)
-- Proper invariant enforcement
-- Clear separation of concerns
-- Comprehensive documentation
+With debug output:
+```bash
+smartgen generate domain --debug
+```
 
 ## Commands
 
@@ -151,9 +147,10 @@ llm:
 - **Ollama** - Run models locally (deepseek-coder-v2, codellama, etc.)
 
 #### Cloud Providers (OpenAI API)
-- **Chat Models** - GPT-4, GPT-3.5-turbo (uses chat completions API)
-- **Codex Models** - code-davinci-002, code-cushman-002 (uses legacy completions API)
-- **Custom Endpoints** - Any OpenAI-compatible API (add `base_url` field)
+- **Codex Models** - code-davinci-002, code-cushman-002 (specialized for code generation)
+- **Chat Models** - GPT-4, GPT-3.5-turbo (general purpose)
+
+**Recommendation:** For domain generation, Codex models typically produce higher quality code with better DDD adherence. If using chat models, ensure they can output clean JSON responses.
 
 ### Adding Providers
 
@@ -161,17 +158,17 @@ llm:
 # Add Ollama (local)
 smartgen llmconfig add ollama local --model deepseek-coder-v2 --url http://localhost:11434
 
-# Add GPT-4 (chat model)
-smartgen llmconfig add gpt4 cloud --model gpt-4 --api-key YOUR_API_KEY
-
 # Add Codex (optimized for code generation)
 smartgen llmconfig add codex cloud --model code-davinci-002 --api-key YOUR_API_KEY
+
+# Add GPT-4 (general purpose)
+smartgen llmconfig add gpt4 cloud --model gpt-4 --api-key YOUR_API_KEY
 
 # Set default
 smartgen llmconfig set-default codex
 ```
 
-**Note:** Codex models are specifically designed for code generation and often produce more accurate domain models with better adherence to DDD principles.
+**Best Practice:** Use Codex models for superior domain generation quality.
 
 ## Development
 

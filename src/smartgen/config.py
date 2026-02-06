@@ -33,15 +33,81 @@ class ConfigManager:
             json.dump(config, f, indent=2)
 
     @classmethod
-    def update_llm_config(cls, default: str, api_key: str) -> None:
-        """Update LLM configuration."""
+    def add_provider(
+        cls,
+        name: str,
+        provider_type: str,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        url: Optional[str] = None,
+    ) -> None:
+        """Add or update an LLM provider."""
         config = cls.load_config()
         if "llm" not in config:
             config["llm"] = {}
-        config["llm"]["default"] = default
-        config["llm"]["providers"] = config["llm"].get("providers", {})
-        config["llm"]["providers"][default] = {"api_key": api_key}
+        if "providers" not in config["llm"]:
+            config["llm"]["providers"] = {}
+
+        # Check if this is the first provider
+        is_first_provider = len(config["llm"]["providers"]) == 0
+
+        provider_config = {"type": provider_type}
+
+        if api_key:
+            provider_config["api_key"] = api_key
+        if model:
+            provider_config["model"] = model
+        else:
+            # Set default model for local providers
+            if provider_type == "local":
+                provider_config["model"] = "deepseek-coder-v2"
+        if url:
+            provider_config["url"] = url
+        else:
+            # Set default URL for local providers
+            if provider_type == "local":
+                provider_config["url"] = "http://localhost:11434"
+
+        config["llm"]["providers"][name] = provider_config
+
+        # Auto-set as default if it's the first provider
+        if is_first_provider:
+            config["llm"]["default"] = name
+
         cls.save_config(config)
+
+    @classmethod
+    def set_default_provider(cls, provider_name: str) -> None:
+        """Set the default provider."""
+        config = cls.load_config()
+        if "llm" not in config:
+            config["llm"] = {}
+        providers = config["llm"].get("providers", {})
+        if provider_name not in providers:
+            raise ValueError(f"Provider '{provider_name}' not found")
+        config["llm"]["default"] = provider_name
+        cls.save_config(config)
+
+    @classmethod
+    def remove_provider(cls, provider_name: str) -> None:
+        """Remove a provider."""
+        config = cls.load_config()
+        if "llm" not in config:
+            return
+        providers = config["llm"].get("providers", {})
+        if provider_name not in providers:
+            raise ValueError(f"Provider '{provider_name}' not found")
+        del config["llm"]["providers"][provider_name]
+        # If this was the default, unset default
+        if config["llm"].get("default") == provider_name:
+            config["llm"].pop("default", None)
+        cls.save_config(config)
+
+    @classmethod
+    def update_llm_config(cls, default: str, api_key: str) -> None:
+        """Update LLM configuration (legacy)."""
+        cls.add_provider(name=default, provider_type="cloud", api_key=api_key)
+        cls.set_default_provider(default)
 
     @classmethod
     def get_llm_config(cls) -> Optional[dict]:

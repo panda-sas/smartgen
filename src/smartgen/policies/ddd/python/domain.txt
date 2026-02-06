@@ -1,0 +1,109 @@
+### **Domain Layer Design Rules**
+
+#### **1\. Dependency Rule**
+
+* **No framework coupling: Domain must not import or depend on UI/web frameworks, ORMs, serialization libraries (e.g., Pydantic), messaging clients, DI containers, logging frameworks, or configuration providers.**
+
+* **Pure code only: Standard library preferred. If a third-party library is used, it must be *pure*, stable, and not introduce infrastructure coupling (document the reason).**
+
+* **No I/O: No database access, file/network calls, HTTP requests, message publishing, or environment reads.**
+
+#### **2\. Model Types**
+
+* **Entities: Have a stable identity (`Id`). Equality is by identity only.**
+
+* **Value Objects: Immutable, equality by value, validate on creation, no identity, no side effects.**
+
+* **Domain Errors: Use domain-specific exceptions/errors; never expose transport concerns (HTTP codes) or framework exception types.**
+
+#### **3\. Invariants and State Changes**
+
+* **Invariants live in the model: Aggregate roots/entities must enforce invariants on construction and on every state transition.**
+
+* **No public setters for invariant-bearing state: expose intent methods (`complete()`, `start()`, `rename()`).**
+
+* **Invalid states should be hard to represent: prefer enums/value objects over strings/primitives where it improves clarity.**
+
+#### **4\. Aggregates**
+
+* **One aggregate root per aggregate. Only the root is referenced externally.**
+
+* **Consistency boundary: All invariants that must be strongly consistent are enforced inside the aggregate.**
+
+* **Reference other aggregates by ID only (no object graphs across aggregates).**
+
+* **Default: one transaction updates one aggregate. If a use case requires multiple aggregates in a transaction, treat it as an explicit exception and keep cross-aggregate invariants out of entity methods.**
+
+#### **5\. Logic Placement**
+
+* **Value Object: validation/calculation local to a cohesive attribute set.**
+
+* **Entity/Aggregate Root: lifecycle/state transitions and invariants for that identity.**
+
+* **Domain Service (stateless): domain logic spanning multiple entities within the same bounded context when it does not naturally belong to one object.**
+
+* **Application Service/Use Case: orchestration, repository access, external calls, cross-aggregate coordination.**
+
+**Domain services must not perform persistence or external lookups. They operate on objects passed in.**
+
+#### **6\. Factories**
+
+* **Use `__init__` / `@classmethod` for simple creation.**
+
+* **Use a factory only when creation:**
+
+  * **builds a complex object graph within an aggregate,**
+
+  * **requires multi-step validation,**
+
+  * **needs polymorphic selection.**
+
+* **Factories must still be pure (no I/O, no DB calls).**
+
+#### **7\. Bounded Context Safety**
+
+* **Do not share domain models across bounded contexts.**
+
+* **Translate at boundaries (ACL/mappers) outside the domain.**
+
+#### **8\. Domain Events (optional)**
+
+* **Events represent business facts (immutable).**
+
+* **Aggregates may record events internally; publication happens outside domain.**
+
+#### **9\. Code Organization**
+
+* **Separate directories: Organize domain models into separate directories:**
+  * **`aggregates/`: Aggregate roots (e.g., `Order`, `Project`, `Workspace`)**
+  * **`entities/`: Entities that are not aggregate roots (e.g., `OrderLine`, `Task`)**
+  * **`value_objects/`: Value objects (e.g., `Email`, `Money`, `TaskId`, `DateRange`)**
+  * **`services/`: Domain services (stateless logic spanning multiple entities)**
+  * **`errors/` or `exceptions/`: Domain-specific errors and exceptions**
+
+* **Clear file structure: Each model should be in its own file. Use `__init__.py` to expose public API.**
+
+#### **10\. Documentation Requirements**
+
+* **Docstrings required: Every class, method, and function must have a docstring explaining:**
+  * **Purpose and responsibility**
+  * **Parameters and return values**
+  * **Invariants being enforced**
+  * **Examples for complex logic**
+
+* **Docstring format: Use triple-quoted strings with clear sections for Args, Returns, Raises.**
+
+* **Inline comments: Add comments for non-obvious business rules or constraints.**
+
+---
+
+## **Additional “generator guardrails” (high value)**
+
+* **Primitive obsession check: if a primitive appears repeatedly (email, money, status, id), consider a value object (but don’t overdo it).**
+
+* **Anemic model check: if most rules are outside the entity/aggregate, move them in unless they’re cross-aggregate or orchestration.**
+
+* **Framework smell check: any import from web/ORM/serialization packages in domain is a hard failure.**
+
+* **Testability check: every invariant must be unit-testable without mocks of DB/network.**
+

@@ -10,6 +10,12 @@ dependencies = [
     "typer>=0.21.1",
     "ollama>=0.2.1",
     "PyYAML>=6.0.2",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+cloud = [
+    "openai>=1.0.0",
 ]
 
 [project.urls]

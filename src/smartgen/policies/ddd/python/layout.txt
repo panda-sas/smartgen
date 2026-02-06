@@ -1,0 +1,76 @@
+Project Structure–Only Generation Rules (NO IMPLEMENTATION)
+Global Constraint (Critical)
+DO NOT generate any implementation, logic, code bodies, classes, functions, imports.
+The output must consist ONLY of:
+Folder creation
+Empty code files (No code, at most a single placeholder comment or docstring)
+The sole goal is to scaffold the project layout (directory and file structure).
+
+1. Layer Definitions (Conceptual Only)
+The following layer descriptions are informational only and must not result in any code generation.
+Application Layer
+Orchestration and use-case coordination, Abstraction of repositories, Ports etc
+No business logic
+Produces DTOs
+
+Infrastructure Layer
+External integrations and persistence
+Technical concerns only
+
+Interface Layer
+APIs, CLI, and user interaction boundaries
+Request/response translation
+Do not translate these descriptions into code.
+
+3. File Creation Rules
+For each directory that implies Python modules:
+Create an empty __init__.py
+Create placeholder files following naming conventions below
+Files must contain a single placeholder comment or docstring
+
+4. Naming Conventions (Files Only, No Content)
+Create files using the following patterns:
+Application Layer
+src/application/use_cases/{entity}_{operation}_use_case.py
+src/application/dtos/{entity}_dto.py
+src/application/mappers/{entity}_mapper.py
+src/application/ports
+
+Infrastructure Layer
+src/infrastructure/repositories/{entity}_repository.py
+src/infrastructure/adapters/{service}_adapter.py
+src/infrastructure/gateways/{service}_gateway.py
+src/infrastructure/persistence/{entity}_model.py
+
+Interface Layer
+
+src/interface/http/controllers/{entity}_controller.py
+src/interface/http/routes/{entity}_routes.py
+src/interface/http/schemas/{entity}_schema.py
+src/interface/http/middleware/{concern}_middleware.py
+src/interface/cli/commands/{command}_command.py
+
+Do not infer entities or operations unless explicitly instructed.
+If no entities are provided, create directories only.
+
+5. Explicitly Forbidden Output
+No classes
+No functions
+No method signatures
+No imports
+No decorators
+No example code
+
+6. Allowed Output Examples
+Creating folders
+Creating no code .py files or files with single line comment/docstring
+Creating __init__.py files
+Creating an empty main.py
+
+7. Dependency Rules (Informational Only)
+Interface → Application → Domain
+  ↓           ↓
+Infrastructure
+
+These rules must not produce any code.
+make sure all files are inside src/

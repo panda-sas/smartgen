@@ -1,0 +1,19 @@
+[project]
+name = "smartgen"
+version = "0.1.0"
+description = "Smart code and content generator"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Siddhant Rath" }]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/sidxz/smartgen"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+smartgen = "smartgen.cli:main"

@@ -8,6 +8,8 @@ authors = [{ name = "Siddhant Rath" }]
 requires-python = ">=3.12"
 dependencies = [
     "typer>=0.21.1",
+    "ollama>=0.2.1",
+    "PyYAML>=6.0.2",
 ]
 
 [project.urls]

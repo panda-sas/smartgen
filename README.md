@@ -380,23 +380,8 @@ black --check .
 ## Learn More
 
 - [Examples](examples/) - See SmartGen in action
-- [Roadmap](ROADMAP.md) - Upcoming features
 - [Security](SECURITY.md) - Security best practices
 - [Contributing](CONTRIBUTING.md) - How to contribute
-
----
-
-## Roadmap
-
-- [ ] Support for TypeScript/JavaScript
-- [ ] Support for Java/Kotlin
-- [ ] Interactive mode with prompts
-- [ ] Custom template support
-- [ ] VS Code extension
-- [ ] Web UI for visual domain modeling
-- [ ] Integration with popular frameworks (FastAPI, Django, etc.)
-
-See [ROADMAP.md](ROADMAP.md) for the full roadmap.
 
 ---
 

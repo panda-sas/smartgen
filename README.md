@@ -1,4 +1,4 @@
-# SmartGen 🚀
+# SmartGen
 
 <div align="center">
 
@@ -11,17 +11,17 @@
 
 *Generate clean, maintainable DDD code from requirements using AI*
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Examples](#-examples) • [Documentation](#-documentation) • [Contributing](#-contributing)
+[Features](#features) • [Quick Start](#quick-start) • [Examples](#examples) • [Documentation](#documentation) • [Contributing](#contributing)
 
 </div>
 
 ---
 
-## ✨ What is SmartGen?
+## What is SmartGen?
 
 SmartGen is an **AI-powered code generator** that transforms your Software Requirements Specification (SRS) into production-ready Domain-Driven Design (DDD) code. Instead of manually scaffolding entities, value objects, and aggregates, SmartGen uses Large Language Models (LLMs) to generate architecturally sound domain code that follows DDD principles.
 
-### 🎯 Why SmartGen?
+### Why SmartGen?
 
 **The Problem:**
 - Setting up DDD projects is time-consuming and error-prone
@@ -30,27 +30,27 @@ SmartGen is an **AI-powered code generator** that transforms your Software Requi
 - Manual code generation is repetitive and boring
 
 **The Solution:**
-- ⚡ **Fast**: Generate domain layers in seconds, not hours
-- 🎯 **Accurate**: Policy-driven generation ensures DDD compliance
-- 🔧 **Flexible**: Works with local (Ollama) or cloud (OpenAI) LLMs
-- 📚 **Educational**: Learn DDD patterns by seeing generated code
-- 🔒 **Secure**: API keys never leave your machine
+- **Fast**: Generate domain layers in seconds, not hours
+- **Accurate**: Policy-driven generation ensures DDD compliance
+- **Flexible**: Works with local (Ollama) or cloud (OpenAI) LLMs
+- **Educational**: Learn DDD patterns by seeing generated code
+- **Secure**: API keys never leave your machine
 
 ---
 
-## 🌟 Features
+## Features
 
-- 🏗️ **DDD-Compliant Generation**: Automatically generates entities, value objects, aggregates, and domain services following DDD principles
-- 🤖 **Multi-LLM Support**: Use local models (Ollama) or cloud providers (OpenAI Codex, GPT-4)
-- 📋 **Policy-Driven**: Enforces architectural patterns through configurable policies
-- 🔍 **Debug Mode**: See exactly what prompts are sent to the LLM and how code is generated
-- 🎨 **Clean Architecture**: Generates code following Clean Architecture layer separation
-- ⚙️ **Easy Configuration**: Simple YAML-based project configuration
-- 🔐 **Secure**: API keys stored securely, never committed to repositories
+- **DDD-Compliant Generation**: Automatically generates entities, value objects, aggregates, and domain services following DDD principles
+- **Multi-LLM Support**: Use local models (Ollama) or cloud providers (OpenAI Codex, GPT-4)
+- **Policy-Driven**: Enforces architectural patterns through configurable policies
+- **Debug Mode**: See exactly what prompts are sent to the LLM and how code is generated
+- **Clean Architecture**: Generates code following Clean Architecture layer separation
+- **Easy Configuration**: Simple YAML-based project configuration
+- **Secure**: API keys stored securely, never committed to repositories
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -58,7 +58,7 @@ SmartGen is an **AI-powered code generator** that transforms your Software Requi
 pip install smartgen
 ```
 
-### 1️⃣ Set Up Your LLM Provider
+### 1. Set Up Your LLM Provider
 
 **Option A: Use Ollama (Local, Free)**
 ```bash
@@ -77,13 +77,13 @@ smartgen llmconfig add codex cloud --model code-davinci-002 --api-key sk-...
 smartgen llmconfig set-default codex
 ```
 
-### 2️⃣ Initialize Your Project
+### 2. Initialize Your Project
 
 ```bash
 smartgen init --language python --pattern ddd --app api
 ```
 
-### 3️⃣ Write Your Requirements
+### 3. Write Your Requirements
 
 Edit `srs.md` with your domain requirements:
 
@@ -101,7 +101,7 @@ Edit `srs.md` with your domain requirements:
 - Products can be active or inactive
 ```
 
-### 4️⃣ Generate Domain Layer
+### 4. Generate Domain Layer
 
 ```bash
 smartgen generate domain
@@ -113,7 +113,7 @@ That's it! SmartGen will analyze your requirements and generate:
 - Aggregates with proper boundaries
 - Domain services where needed
 
-### 5️⃣ Generate Application Layout (Optional)
+### 5. Generate Application Layout (Optional)
 
 ```bash
 smartgen generate layout
@@ -123,17 +123,17 @@ This creates the application, infrastructure, and interface layer structure.
 
 ---
 
-## 📊 SmartGen vs Alternatives
+## SmartGen vs Alternatives
 
 | Feature | SmartGen | Manual Setup | ChatGPT/Copilot | Other Generators |
 |---------|----------|-------------|-----------------|------------------|
-| **DDD Compliance** | ✅ Policy-enforced | ⚠️ Manual | ❌ No guarantees | ⚠️ Varies |
-| **Speed** | ⚡ Seconds | 🐌 Hours | ⚡ Fast | ⚡ Fast |
-| **Consistency** | ✅ Always | ⚠️ Team-dependent | ❌ Inconsistent | ⚠️ Template-based |
-| **Learning** | ✅ Shows patterns | ❌ No guidance | ⚠️ Limited | ❌ No explanation |
-| **LLM Flexibility** | ✅ Local + Cloud | N/A | ❌ Cloud only | ❌ Usually none |
-| **Policy-Driven** | ✅ Yes | ❌ No | ❌ No | ⚠️ Sometimes |
-| **Cost** | 💰 Free (local) or Pay-per-use | 💰 Time | 💰 Subscription | 💰 Varies |
+| **DDD Compliance** | Policy-enforced | Manual | No guarantees | Varies |
+| **Speed** | Seconds | Hours | Fast | Fast |
+| **Consistency** | Always | Team-dependent | Inconsistent | Template-based |
+| **Learning** | Shows patterns | No guidance | Limited | No explanation |
+| **LLM Flexibility** | Local + Cloud | N/A | Cloud only | Usually none |
+| **Policy-Driven** | Yes | No | No | Sometimes |
+| **Cost** | Free (local) or Pay-per-use | Time | Subscription | Varies |
 
 ### Why Choose SmartGen?
 
@@ -144,7 +144,7 @@ This creates the application, infrastructure, and interface layer structure.
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 ### Commands
 
@@ -209,7 +209,7 @@ smartgen generate layout
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Project Configuration (`.smartgen.yml`)
 
@@ -243,18 +243,18 @@ llm:
 
 #### Local Providers
 - **Ollama** - Run models locally (deepseek-coder-v2, codellama, etc.)
-  - ✅ Free
-  - ✅ Private (data stays local)
-  - ✅ No API costs
+  - Free
+  - Private (data stays local)
+  - No API costs
 
 #### Cloud Providers (OpenAI API)
 - **Codex Models** - code-davinci-002, code-cushman-002 (specialized for code generation)
-  - ✅ Best code quality
-  - ✅ Optimized for code generation
-  - ⚠️ Requires API key
+  - Best code quality
+  - Optimized for code generation
+  - Requires API key
 - **Chat Models** - GPT-4, GPT-3.5-turbo (general purpose)
-  - ✅ Versatile
-  - ⚠️ May require JSON mode configuration
+  - Versatile
+  - May require JSON mode configuration
 
 **Recommendation:** For domain generation, Codex models typically produce higher quality code with better DDD adherence. If using chat models, ensure they can output clean JSON responses.
 
@@ -278,7 +278,7 @@ smartgen llmconfig set-default codex
 
 ---
 
-## 📸 Examples
+## Examples
 
 ### Example: E-Commerce Domain
 
@@ -315,7 +315,7 @@ See the [`examples/`](examples/) directory for complete examples.
 
 ---
 
-## 🏗️ Generated Project Structure
+## Generated Project Structure
 
 SmartGen generates code following Clean Architecture principles:
 
@@ -341,7 +341,7 @@ your-project/
 
 ---
 
-## 🔒 Security
+## Security
 
 SmartGen follows security best practices:
 
@@ -353,7 +353,7 @@ See [SECURITY.md](SECURITY.md) for details.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
@@ -377,7 +377,7 @@ black --check .
 
 ---
 
-## 📚 Learn More
+## Learn More
 
 - [Examples](examples/) - See SmartGen in action
 - [Roadmap](ROADMAP.md) - Upcoming features
@@ -386,7 +386,7 @@ black --check .
 
 ---
 
-## 🛣️ Roadmap
+## Roadmap
 
 - [ ] Support for TypeScript/JavaScript
 - [ ] Support for Java/Kotlin
@@ -400,13 +400,13 @@ See [ROADMAP.md](ROADMAP.md) for the full roadmap.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Inspired by Clean Architecture principles by Robert C. Martin
 - Domain-Driven Design concepts by Eric Evans
@@ -416,9 +416,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Made with ❤️ for the DDD/Clean Architecture community**
+**Made with love for the DDD/Clean Architecture community**
 
-⭐ **Star this repo if you find it useful!**
+**Star this repo if you find it useful!**
 
 [Report Bug](https://github.com/sidxz/smartgen/issues) • [Request Feature](https://github.com/sidxz/smartgen/issues) • [Discussions](https://github.com/sidxz/smartgen/discussions)
 

@@ -135,7 +135,11 @@ class LLMInitService:
         pattern: str,
         app: str,
     ) -> Path:
-        """Write the .smartgen.yml file to the target directory."""
+        """Write the .smartgen.yml file to the target directory.
+        
+        Note: API keys are never written to the project file. They remain
+        in the global ~/.smartgen/.llmconfig file for security.
+        """
         from yaml import safe_dump
 
         target_dir.mkdir(parents=True, exist_ok=True)
@@ -144,6 +148,9 @@ class LLMInitService:
             raise LLMInitError(
                 f"'{yaml_path.name}' already exists in {target_dir}."
             )
+
+        # Create a sanitized config without sensitive data
+        sanitized_config = self._sanitize_provider_config(provider_config)
 
         config_payload = {
             "project": {
@@ -154,7 +161,7 @@ class LLMInitService:
             "llm": {
                 "default": provider_name,
                 "providers": {
-                    provider_name: provider_config,
+                    provider_name: sanitized_config,
                 },
             }
         }
@@ -166,6 +173,29 @@ class LLMInitService:
         )
         yaml_path.write_text(yaml_content, encoding="utf-8")
         return yaml_path
+    
+    def _sanitize_provider_config(self, provider_config: dict[str, Any]) -> dict[str, Any]:
+        """Remove sensitive data from provider config before writing to project file.
+        
+        Args:
+            provider_config: The full provider configuration
+            
+        Returns:
+            Sanitized config without API keys or other sensitive data
+        """
+        sanitized = dict(provider_config)
+        
+        # Remove API key - it should only be in global config
+        if "api_key" in sanitized:
+            del sanitized["api_key"]
+        
+        # Remove any other sensitive fields if they exist
+        sensitive_fields = ["api_secret", "password", "token"]
+        for field in sensitive_fields:
+            if field in sanitized:
+                del sanitized[field]
+        
+        return sanitized
 
     def _create_project_assets(self, target_dir: Path) -> tuple[Path, Path]:
         """Create the SRS file and stories folder."""

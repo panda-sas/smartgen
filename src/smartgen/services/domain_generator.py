@@ -81,6 +81,9 @@ class DomainGeneratorService:
         if not provider_config:
             raise GeneratorError(f"Provider '{default_provider}' not found in configuration")
         
+        # Merge with global config to get API keys (they're not stored in project file)
+        provider_config = self._merge_with_global_config(default_provider, provider_config)
+        
         # 2. Read SRS
         srs_content = self._read_srs(project_dir)
         
@@ -133,6 +136,37 @@ class DomainGeneratorService:
         
         with open(config_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
+    
+    def _merge_with_global_config(self, provider_name: str, project_config: dict[str, Any]) -> dict[str, Any]:
+        """Merge project provider config with global config to get API keys.
+        
+        API keys are stored in ~/.smartgen/.llmconfig (global) but not in 
+        .smartgen.yml (project) for security. This method merges them.
+        
+        Args:
+            provider_name: Name of the provider
+            project_config: Provider config from project .smartgen.yml
+            
+        Returns:
+            Merged config with API keys from global config
+        """
+        from smartgen.config import ConfigManager
+        
+        merged_config = dict(project_config)
+        
+        # Load global config
+        global_config = ConfigManager.load_config()
+        global_llm = global_config.get("llm", {})
+        global_providers = global_llm.get("providers", {})
+        global_provider_config = global_providers.get(provider_name, {})
+        
+        # Merge sensitive fields from global config
+        sensitive_fields = ["api_key", "api_secret", "token", "password"]
+        for field in sensitive_fields:
+            if field in global_provider_config and field not in merged_config:
+                merged_config[field] = global_provider_config[field]
+        
+        return merged_config
 
     def _read_srs(self, project_dir: Path) -> str:
         """Read the Software Requirements Specification."""
@@ -257,30 +291,68 @@ Generate the domain layer code now:"""
             raise LLMError(f"Failed to call Ollama: {e}") from e
 
     def _call_cloud_provider(self, provider_config: dict[str, Any], prompt: str) -> str:
-        """Call cloud LLM provider (OpenAI, Anthropic, etc.)."""
-        # For now, support OpenAI-compatible APIs
-        try:
-            import openai
-        except ImportError as exc:
-            raise LLMError(
-                "openai package not installed. Install it with: pip install openai"
-            ) from exc
+        """Call cloud LLM provider (OpenAI chat models, Codex, etc.)."""
+        import openai
         
         api_key = provider_config.get("api_key")
         model = provider_config.get("model", "gpt-4")
+        base_url = provider_config.get("base_url")  # Support custom API endpoints
+        
+        # Determine if this is a Codex model (uses legacy completions API)
+        is_codex = self._is_codex_model(model)
         
         try:
-            client = openai.OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ],
-            )
+            client_kwargs = {"api_key": api_key}
+            if base_url:
+                client_kwargs["base_url"] = base_url
             
-            return response.choices[0].message.content or ""
+            client = openai.OpenAI(**client_kwargs)
+            
+            if is_codex:
+                # Codex models use the legacy completions API
+                if self._debug:
+                    self._print_debug("Using Codex API", f"Model: {model} (legacy completions)")
+                
+                response = client.completions.create(
+                    model=model,
+                    prompt=prompt,
+                    max_tokens=4000,
+                    temperature=0.2,
+                )
+                return response.choices[0].text or ""
+            else:
+                # Modern chat models (GPT-3.5, GPT-4, etc.)
+                if self._debug:
+                    self._print_debug("Using Chat API", f"Model: {model}")
+                
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": "You are an expert software architect specializing in Domain-Driven Design."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.2,
+                )
+                return response.choices[0].message.content or ""
         except Exception as e:
             raise LLMError(f"Failed to call cloud provider: {e}") from e
+    
+    def _is_codex_model(self, model: str) -> bool:
+        """Check if the model is a Codex model that uses completions API.
+        
+        Args:
+            model: Model name
+            
+        Returns:
+            True if it's a Codex model
+        """
+        codex_models = [
+            "code-davinci-002",
+            "code-davinci-001", 
+            "code-cushman-002",
+            "code-cushman-001",
+        ]
+        return model in codex_models or model.startswith("code-")
 
     def _write_domain_files(
         self,

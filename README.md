@@ -10,8 +10,9 @@ A DDD/Clean Architecture friendly code generator.
 ## Installation
 
 ```bash
-pip install -e .
-```
+# Install smartgen with all dependencies
+pip install smartgen
+
 
 ## Usage
 
@@ -131,7 +132,46 @@ llm:
       type: local
       model: deepseek-coder-v2
       url: http://localhost:11434
+    
+    # OpenAI GPT-4 (chat model)
+    # Note: api_key is stored in ~/.smartgen/.llmconfig
+    gpt4:
+      type: cloud
+      model: gpt-4
+    
+    # OpenAI Codex (completions model)
+    codex:
+      type: cloud
+      model: code-davinci-002
 ```
+
+### Supported LLM Providers
+
+#### Local Providers
+- **Ollama** - Run models locally (deepseek-coder-v2, codellama, etc.)
+
+#### Cloud Providers (OpenAI API)
+- **Chat Models** - GPT-4, GPT-3.5-turbo (uses chat completions API)
+- **Codex Models** - code-davinci-002, code-cushman-002 (uses legacy completions API)
+- **Custom Endpoints** - Any OpenAI-compatible API (add `base_url` field)
+
+### Adding Providers
+
+```bash
+# Add Ollama (local)
+smartgen llmconfig add ollama local --model deepseek-coder-v2 --url http://localhost:11434
+
+# Add GPT-4 (chat model)
+smartgen llmconfig add gpt4 cloud --model gpt-4 --api-key YOUR_API_KEY
+
+# Add Codex (optimized for code generation)
+smartgen llmconfig add codex cloud --model code-davinci-002 --api-key YOUR_API_KEY
+
+# Set default
+smartgen llmconfig set-default codex
+```
+
+**Note:** Codex models are specifically designed for code generation and often produce more accurate domain models with better adherence to DDD principles.
 
 ## Development
 

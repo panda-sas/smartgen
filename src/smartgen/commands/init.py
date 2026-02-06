@@ -6,10 +6,12 @@ from rich.progress import (
     BarColumn,
     Progress,
     SpinnerColumn,
-    TextColumn,rm 
+    TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
+from rich.panel import Panel
+from rich import print as rich_print
 
 from smartgen.services.llm_init import (
     LLMInitError,
@@ -20,7 +22,11 @@ from smartgen.services.llm_init import (
 )
 
 
-def init_command() -> None:
+def init_command(
+    language: str = typer.Option("python", help="Project language"),
+    pattern: str = typer.Option("ddd", help="Project architecture pattern"),
+    app: str = typer.Option("api", help="Application type"),
+) -> None:
     """Initialize smartgen in the current directory."""
     progress = Progress(
         SpinnerColumn(),
@@ -80,7 +86,12 @@ def init_command() -> None:
             service = LLMInitService(
                 ollama_progress_callback=progress_callback,
             )
-            result = service.initialize(Path.cwd())
+            result = service.initialize(
+                Path.cwd(),
+                language=language,
+                pattern=pattern,
+                app=app,
+            )
     except MissingApiKeyError as exc:
         typer.echo(typer.style("✗ ", fg=typer.colors.RED) + str(exc), err=True)
         raise typer.Exit(1)
@@ -97,10 +108,22 @@ def init_command() -> None:
     )
 
     if result.pull_response:
-        typer.echo("Ollama pull result:")
-        typer.echo(result.pull_response)
+        typer.echo(
+            typer.style("✓ ", fg=typer.colors.GREEN)
+            + "Ollama model pulled successfully."
+        )
 
     typer.echo(
         typer.style("✓ ", fg=typer.colors.GREEN)
         + f"Created {result.yaml_path.name} in {result.yaml_path.parent}"
+    )
+
+    rich_print(
+        Panel.fit(
+            "Blank Software Requirements Specification created at "
+            f"{result.srs_path.name}.\n"
+            "Please provide the initial requirement to get started.",
+            title="Next step",
+            border_style="yellow",
+        )
     )

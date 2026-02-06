@@ -34,6 +34,8 @@ class InitResult:
     provider_name: str
     provider_config: dict[str, Any]
     yaml_path: Path
+    srs_path: Path
+    stories_path: Path
     pull_response: Optional[str] = None
 
 
@@ -52,7 +54,14 @@ class LLMInitService:
         self._ollama_client_factory = ollama_client_factory
         self._ollama_progress_callback = ollama_progress_callback
 
-    def initialize(self, target_dir: Path) -> InitResult:
+    def initialize(
+        self,
+        target_dir: Path,
+        *,
+        language: str,
+        pattern: str,
+        app: str,
+    ) -> InitResult:
         """Initialize smartgen in the target directory."""
         llm_config = self._config_manager.get_llm_config()
         if not llm_config:
@@ -101,12 +110,19 @@ class LLMInitService:
             target_dir=target_dir,
             provider_name=default_provider,
             provider_config=normalized_provider_config,
+            language=language,
+            pattern=pattern,
+            app=app,
         )
+
+        srs_path, stories_path = self._create_project_assets(target_dir)
 
         return InitResult(
             provider_name=default_provider,
             provider_config=normalized_provider_config,
             yaml_path=yaml_path,
+            srs_path=srs_path,
+            stories_path=stories_path,
             pull_response=pull_response,
         )
 
@@ -115,6 +131,9 @@ class LLMInitService:
         target_dir: Path,
         provider_name: str,
         provider_config: dict[str, Any],
+        language: str,
+        pattern: str,
+        app: str,
     ) -> Path:
         """Write the .smartgen.yml file to the target directory."""
         from yaml import safe_dump
@@ -127,6 +146,11 @@ class LLMInitService:
             )
 
         config_payload = {
+            "project": {
+                "language": language,
+                "pattern": pattern,
+                "app": app,
+            },
             "llm": {
                 "default": provider_name,
                 "providers": {
@@ -142,6 +166,22 @@ class LLMInitService:
         )
         yaml_path.write_text(yaml_content, encoding="utf-8")
         return yaml_path
+
+    def _create_project_assets(self, target_dir: Path) -> tuple[Path, Path]:
+        """Create the SRS file and stories folder."""
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        srs_path = target_dir / "srs.md"
+        if not srs_path.exists():
+            srs_path.write_text("", encoding="utf-8")
+
+        stories_path = target_dir / "stories"
+        stories_path.mkdir(parents=True, exist_ok=True)
+        
+        src_path = target_dir / "src"
+        src_path.mkdir(parents=True, exist_ok=True)
+
+        return srs_path, stories_path
 
     def _pull_ollama_model(self, model: str, url: str) -> str:
         """Pull the model from Ollama and return response as JSON."""

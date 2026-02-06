@@ -69,7 +69,7 @@ A full-featured e-commerce domain demonstrating:
 - Aggregate (Order with OrderItems)
 - Business rule enforcement
 
-**See**: [`examples/ecommerce/README.md`](examples/ecommerce/README.md) for full documentation
+**See**: [`examples/ecommerce/readme.md`](examples/ecommerce/readme.md) for full documentation
 
 ## Real-World Use Cases
 
@@ -233,5 +233,5 @@ class User:
 ## Resources
 
 - [Examples Directory](examples/) - Complete example projects
-- [Main README](README.md) - SmartGen documentation
-- [Contributing Guide](CONTRIBUTING.md) - How to contribute examples
+- [Main readme](readme.md) - SmartGen documentation
+- [Contributing Guide](contributing.md) - How to contribute examples

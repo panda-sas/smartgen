@@ -8,6 +8,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Tests](https://github.com/sidxz/smartgen/workflows/Tests/badge.svg)](https://github.com/sidxz/smartgen/actions/workflows/test.yml)
+[![Lint](https://github.com/sidxz/smartgen/workflows/Lint/badge.svg)](https://github.com/sidxz/smartgen/actions/workflows/lint.yml)
+[![PyPI version](https://badge.fury.io/py/smartgen.svg)](https://badge.fury.io/py/smartgen)
+[![PyPI downloads](https://img.shields.io/pypi/dm/smartgen)](https://pypi.org/project/smartgen/)
+[![GitHub stars](https://img.shields.io/github/stars/sidxz/smartgen?style=social)](https://github.com/sidxz/smartgen/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/sidxz/smartgen?style=social)](https://github.com/sidxz/smartgen/network/members)
 
 *Generate clean, maintainable DDD code from requirements using AI*
 
@@ -349,13 +355,13 @@ SmartGen follows security best practices:
 - **Project Config**: `.smartgen.yml` contains no sensitive data and is safe to commit
 - **Local Option**: Use Ollama for completely private, local code generation
 
-See [SECURITY.md](SECURITY.md) for details.
+See [security.md](security.md) for details.
 
 ---
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](contributing.md) for details.
 
 ### Development Setup
 
@@ -380,14 +386,14 @@ black --check .
 ## Learn More
 
 - [Examples](examples/) - See SmartGen in action
-- [Security](SECURITY.md) - Security best practices
-- [Contributing](CONTRIBUTING.md) - How to contribute
+- [Security](security.md) - Security best practices
+- [Contributing](contributing.md) - How to contribute
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [license](license) file for details.
 
 ---
 

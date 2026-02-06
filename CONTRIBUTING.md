@@ -123,7 +123,7 @@ smartgen/
 - **Docstrings**: All public functions, classes, and methods must have docstrings
 - **Type Hints**: Use type hints for function parameters and return values
 - **Comments**: Add comments for complex logic or business rules
-- **README Updates**: Update README.md for user-facing changes
+- **README Updates**: Update readme.md for user-facing changes
 
 ### Testing
 
@@ -217,7 +217,7 @@ Fixes #123
 
 1. Create command function in `commands/` directory
 2. Register command in `cli.py`
-3. Add command documentation to README
+3. Add command documentation to readme
 4. Add tests
 
 ## Pull Request Process
@@ -257,7 +257,7 @@ Fixes #123
 
 - Open an issue for questions or clarifications
 - Check existing issues and discussions
-- Review the [README](README.md) for usage examples
+- Review the [readme](readme.md) for usage examples
 
 ## License
 

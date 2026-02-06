@@ -14,7 +14,7 @@ A complete e-commerce domain with:
 
 **Location**: [`ecommerce/`](ecommerce/)
 
-**See**: [`ecommerce/README.md`](ecommerce/README.md) for detailed documentation
+**See**: [`ecommerce/readme.md`](ecommerce/readme.md) for detailed documentation
 
 ## How to Use Examples
 
@@ -30,7 +30,7 @@ Each example follows this structure:
 ```
 example-name/
 ├── srs.md              # Software Requirements Specification
-├── README.md           # Example documentation
+├── readme.md           # Example documentation
 └── src/
     └── domain/         # Generated domain layer
         ├── aggregates/
@@ -54,11 +54,11 @@ We welcome example contributions! If you have a domain example that demonstrates
 1. Create a new directory under `examples/`
 2. Include a complete `srs.md`
 3. Include generated domain code
-4. Add a `README.md` explaining the example
+4. Add a `readme.md` explaining the example
 5. Submit a pull request
 
 ## Learning Resources
 
 - [Domain-Driven Design](https://domainlanguage.com/ddd/) - Eric Evans
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) - Robert C. Martin
-- [SmartGen Documentation](../../README.md)
+- [SmartGen Documentation](../../readme.md)

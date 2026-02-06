@@ -11,7 +11,7 @@ This example shows how SmartGen generates DDD-compliant domain code from a Softw
 ```
 examples/ecommerce/
 ├── srs.md                          # Software Requirements Specification
-├── README.md                       # This file
+├── readme.md                       # This file
 └── src/
     └── domain/
         ├── aggregates/
@@ -122,6 +122,6 @@ Run `smartgen generate layout` to generate the application structure.
 
 ## Learn More
 
-- See the [main README](../../README.md) for SmartGen usage
-- Check [EXAMPLES.md](../../EXAMPLES.md) for more examples
+- See the [main readme](../../readme.md) for SmartGen usage
+- Check [examples.md](../../examples.md) for more examples
 - Review [DDD policies](../../src/smartgen/policies/ddd/python/domain.txt) to understand generation rules
